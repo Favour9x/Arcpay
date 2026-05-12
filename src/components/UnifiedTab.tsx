@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Info, CheckCircle2, Circle, DollarSign, ExternalLink, Layers, Loader2 } from 'lucide-react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { kit, createAdapter, CHAIN_MAPPING } from '../utils/appKit';
@@ -17,6 +17,11 @@ export default function UnifiedTab() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processType, setProcessType] = useState<'deposit' | 'spend' | null>(null);
   const [error, setError] = useState('');
+
+  // Clear error when component mounts or wallet state changes
+  useEffect(() => {
+    setError('');
+  }, [isConnected, walletClient]);
 
   const depositChains = [
     'Ethereum Sepolia',

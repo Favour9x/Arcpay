@@ -22,6 +22,11 @@ export default function SwapTab() {
   const [isLoadingQuote, setIsLoadingQuote] = useState(false);
   const [error, setError] = useState('');
 
+  // Clear error when component mounts or wallet state changes
+  useEffect(() => {
+    setError('');
+  }, [isConnected, walletClient]);
+
   const balances = {
     USDC: parseFloat(usdcBalance),
     EURC: parseFloat(eurcBalance)
@@ -30,6 +35,7 @@ export default function SwapTab() {
   // Get quote when amount changes
   useEffect(() => {
     const getQuote = async () => {
+      // Don't fetch quote if wallet not ready or no amount
       if (!amount || !walletClient || !address || !isConnected || parseFloat(amount) === 0) {
         setReceiveAmount('');
         setFee('0.00');
@@ -37,6 +43,8 @@ export default function SwapTab() {
       }
 
       setIsLoadingQuote(true);
+      setError(''); // Clear any previous errors
+      
       try {
         const adapter = await createAdapter(walletClient, address);
         const quote = await kit.swap({
@@ -52,11 +60,9 @@ export default function SwapTab() {
         setFee(quote.fees || '0.00');
       } catch (err: any) {
         console.error('Quote error:', err);
-        // Only show error if it's not a wallet connection issue
-        if (walletClient && address && isConnected) {
-          setReceiveAmount(amount); // Fallback to 1:1
-          setFee('0.00');
-        }
+        // Silently fail - don't show error for quote failures
+        setReceiveAmount(amount); // Fallback to 1:1
+        setFee('0.00');
       } finally {
         setIsLoadingQuote(false);
       }

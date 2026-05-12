@@ -6,9 +6,18 @@ import type { WalletClient } from 'viem';
 export const kit = new AppKit();
 
 // Create adapter from wallet client - returns a promise that must be awaited
-export async function createAdapter(walletClient: WalletClient, walletAddress: string) {
-  const adapter = await createViemAdapterFromProvider(walletClient, { walletAddress });
-  return adapter;
+export async function createAdapter(walletClient: WalletClient | undefined, walletAddress: string) {
+  if (!walletClient) {
+    throw new Error('Wallet client not available. Please ensure your wallet is connected.');
+  }
+  
+  try {
+    const adapter = await createViemAdapterFromProvider(walletClient, { walletAddress });
+    return adapter;
+  } catch (error: any) {
+    console.error('Failed to create adapter:', error);
+    throw new Error('Failed to create wallet adapter. Please reconnect your wallet.');
+  }
 }
 
 // Chain name mapping for Circle App Kit

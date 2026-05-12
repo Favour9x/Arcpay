@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Info, CheckCircle2, Circle, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
 import { useAccount, useWalletClient } from 'wagmi';
@@ -21,6 +21,11 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
   const [bridgeSteps, setBridgeSteps] = useState<any[]>([]);
 
   const balance = parseFloat(usdcBalance);
+
+  // Clear error when component mounts or wallet state changes
+  useEffect(() => {
+    setError('');
+  }, [isConnected, walletClient]);
 
   const handleMax = () => {
     setAmount(balance.toString());

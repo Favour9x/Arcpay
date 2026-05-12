@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, Send, Copy, Check, DollarSign, Euro, Loader2 } from 'lucide-react';
 import { Token } from '../types';
 import ConfirmationModal from './ConfirmationModal';
@@ -19,6 +19,11 @@ export default function SendTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+
+  // Clear error when component mounts or wallet state changes
+  useEffect(() => {
+    setError('');
+  }, [isConnected, walletClient]);
 
   const balances = {
     USDC: parseFloat(usdcBalance),
