@@ -66,8 +66,8 @@ export async function pollTransactionReceipt(
   });
 }
 
-// Format balance from 18 decimals
-export function formatBalance(balance: bigint, decimals: number = 18): string {
+// Format balance from 6 decimals (USDC standard)
+export function formatBalance(balance: bigint, decimals: number = 6): string {
   const divisor = BigInt(10 ** decimals);
   const whole = balance / divisor;
   const remainder = balance % divisor;
@@ -75,8 +75,8 @@ export function formatBalance(balance: bigint, decimals: number = 18): string {
   return `${whole}.${remainderStr}`;
 }
 
-// Parse amount to wei (18 decimals)
-export function parseAmount(amount: string, decimals: number = 18): bigint {
+// Parse amount to smallest unit (6 decimals for USDC)
+export function parseAmount(amount: string, decimals: number = 6): bigint {
   const [whole, fraction = ''] = amount.split('.');
   const paddedFraction = fraction.padEnd(decimals, '0').slice(0, decimals);
   return BigInt(whole + paddedFraction);

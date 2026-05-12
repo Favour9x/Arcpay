@@ -3,8 +3,10 @@ import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { formatUnits } from 'viem';
 import { kit, createAdapter } from '../utils/appKit';
 
+const USDC_CONTRACT = '0x3600000000000000000000000000000000000000';
 const EURC_CONTRACT = '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a';
-const EURC_ABI = [
+
+const ERC20_ABI = [
   {
     constant: true,
     inputs: [{ name: '_owner', type: 'address' }],
@@ -29,14 +31,19 @@ export function useBalances() {
     
     setIsLoading(true);
     try {
-      // Fetch USDC balance (native token with 18 decimals)
-      const usdcBal = await publicClient.getBalance({ address });
-      setUsdcBalance(parseFloat(formatUnits(usdcBal, 18)).toFixed(2));
+      // Fetch USDC balance (ERC-20 with 6 decimals - native gas token)
+      const usdcBal = await publicClient.readContract({
+        address: USDC_CONTRACT,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [address]
+      });
+      setUsdcBalance(parseFloat(formatUnits(usdcBal as bigint, 6)).toFixed(2));
 
       // Fetch EURC balance (ERC-20 with 6 decimals)
       const eurcBal = await publicClient.readContract({
         address: EURC_CONTRACT,
-        abi: EURC_ABI,
+        abi: ERC20_ABI,
         functionName: 'balanceOf',
         args: [address]
       });

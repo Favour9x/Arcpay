@@ -39,8 +39,8 @@ export function useTransactionHistory() {
           if (tx.isError === '1') status = 'failed';
           else if (tx.confirmations === '0') status = 'pending';
 
-          // Format amount (convert from wei to readable format)
-          const amount = (parseInt(tx.value) / 1e18).toFixed(2);
+          // Format amount (convert from 6 decimals to readable format)
+          const amount = (parseInt(tx.value) / 1e6).toFixed(2);
 
           // Format timestamp
           const timestamp = new Date(parseInt(tx.timeStamp) * 1000).toLocaleString();
