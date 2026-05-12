@@ -12,11 +12,32 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
   }
   
   try {
-    const adapter = await createViemAdapterFromProvider(walletClient, { walletAddress });
+    // Extract the transport/provider from walletClient
+    // wagmi's walletClient has the provider in the transport
+    const provider = walletClient.transport;
+    
+    // createViemAdapterFromProvider needs the EIP-1193 provider
+    // For wagmi v2, we can pass the walletClient directly as it implements the provider interface
+    const adapter = await createViemAdapterFromProvider(provider as any, { 
+      walletAddress 
+    });
     return adapter;
   } catch (error: any) {
     console.error('Failed to create adapter:', error);
-    throw new Error('Failed to create wallet adapter. Please reconnect your wallet.');
+    console.error('WalletClient type:', walletClient.type);
+    console.error('WalletClient transport:', walletClient.transport);
+    console.error('WalletAddress:', walletAddress);
+    
+    // Try alternative approach - use walletClient directly
+    try {
+      const adapter = await createViemAdapterFromProvider(walletClient as any, { 
+        walletAddress 
+      });
+      return adapter;
+    } catch (retryError: any) {
+      console.error('Retry failed:', retryError);
+      throw new Error(`Failed to create wallet adapter. Please try disconnecting and reconnecting your wallet.`);
+    }
   }
 }
 
