@@ -1,5 +1,5 @@
 import { AppKit } from '@circle-fin/app-kit';
-import { createViemV2Adapter } from '@circle-fin/adapter-viem-v2';
+import { createViemAdapterFromProvider } from '@circle-fin/adapter-viem-v2';
 import { WalletClient } from 'viem';
 
 // Initialize App Kit
@@ -7,7 +7,7 @@ export const kit = new AppKit();
 
 // Create adapter from wallet client
 export function createAdapter(walletClient: WalletClient, walletAddress: string) {
-  return createViemV2Adapter(walletClient, { walletAddress });
+  return createViemAdapterFromProvider(walletClient, { walletAddress });
 }
 
 // Chain name mapping for Circle App Kit
