@@ -7,7 +7,7 @@ import { kit, createAdapter, pollTransactionReceipt } from '../utils/appKit';
 import { useBalances } from '../hooks/useBalances';
 
 export default function SwapTab() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const { usdcBalance, eurcBalance, refetch } = useBalances();
@@ -30,7 +30,7 @@ export default function SwapTab() {
   // Get quote when amount changes
   useEffect(() => {
     const getQuote = async () => {
-      if (!amount || !walletClient || !address || parseFloat(amount) === 0) {
+      if (!amount || !walletClient || !address || !isConnected || parseFloat(amount) === 0) {
         setReceiveAmount('');
         setFee('0.00');
         return;
@@ -53,7 +53,7 @@ export default function SwapTab() {
       } catch (err: any) {
         console.error('Quote error:', err);
         // Only show error if it's not a wallet connection issue
-        if (walletClient && address) {
+        if (walletClient && address && isConnected) {
           setReceiveAmount(amount); // Fallback to 1:1
           setFee('0.00');
         }
@@ -64,7 +64,7 @@ export default function SwapTab() {
 
     const debounce = setTimeout(getQuote, 500);
     return () => clearTimeout(debounce);
-  }, [amount, payToken, receiveToken, walletClient, address]);
+  }, [amount, payToken, receiveToken, walletClient, address, isConnected]);
 
   const handleMax = () => {
     setAmount(balances[payToken].toString());
@@ -82,8 +82,8 @@ export default function SwapTab() {
   };
 
   const handleConfirm = async () => {
-    if (!walletClient || !address || !publicClient) {
-      setError('Wallet not connected');
+    if (!isConnected || !walletClient || !address || !publicClient) {
+      setError('Please connect your wallet first');
       return;
     }
 
@@ -108,6 +108,7 @@ export default function SwapTab() {
 
       setAmount('');
       setReceiveAmount('');
+      setIsModalOpen(false);
       refetch();
     } catch (err: any) {
       console.error('Swap error:', err);
@@ -117,11 +118,13 @@ export default function SwapTab() {
     }
   };
 
-  const isDisabled = !amount || isProcessing || isLoadingQuote || parseFloat(amount) > balances[payToken];
+  const isDisabled = !isConnected || !walletClient || !amount || isProcessing || isLoadingQuote || parseFloat(amount) > balances[payToken];
   const buttonText = isProcessing 
     ? 'Processing...' 
     : isLoadingQuote
     ? 'Getting Quote...'
+    : !isConnected || !walletClient
+    ? 'CONNECT WALLET'
     : !amount 
     ? 'ENTER AMOUNT' 
     : parseFloat(amount) > balances[payToken]

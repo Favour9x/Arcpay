@@ -5,7 +5,7 @@ import { kit, createAdapter, CHAIN_MAPPING } from '../utils/appKit';
 import { useBalances } from '../hooks/useBalances';
 
 export default function UnifiedTab() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { usdcBalance, unifiedBalance, refetch } = useBalances();
   
@@ -34,7 +34,10 @@ export default function UnifiedTab() {
   ];
 
   const handleDeposit = async () => {
-    if (!depositAmount || !walletClient || !address) return;
+    if (!depositAmount || !isConnected || !walletClient || !address) {
+      setError('Please connect your wallet first');
+      return;
+    }
     
     setProcessType('deposit');
     setIsProcessing(true);
@@ -61,7 +64,10 @@ export default function UnifiedTab() {
   };
 
   const handleSpend = async () => {
-    if (!spendAmount || !recipientAddress || !walletClient || !address) return;
+    if (!spendAmount || !recipientAddress || !isConnected || !walletClient || !address) {
+      setError('Please connect your wallet first');
+      return;
+    }
     
     setProcessType('spend');
     setIsProcessing(true);

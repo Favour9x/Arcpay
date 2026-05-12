@@ -61,8 +61,8 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
   };
 
   const handleConfirm = async () => {
-    if (!walletClient || !address) {
-      setError('Wallet not connected');
+    if (!isConnected || !walletClient || !address) {
+      setError('Please connect your wallet first');
       return;
     }
 
@@ -89,6 +89,7 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
       // Reset after success
       setAmount('');
       setRecipientAddress('');
+      setIsModalOpen(false);
       refetch();
     } catch (err: any) {
       console.error('Bridge error:', err);
@@ -97,10 +98,10 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
     }
   };
 
-  const isDisabled = !isConnected || !amount || isBridging || parseFloat(amount) > balance;
+  const isDisabled = !isConnected || !walletClient || !amount || isBridging || parseFloat(amount) > balance;
   const buttonText = isBridging 
     ? 'Processing...' 
-    : !isConnected 
+    : !isConnected || !walletClient
     ? 'Connect Wallet' 
     : !amount 
     ? 'Enter Amount' 

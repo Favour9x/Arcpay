@@ -7,7 +7,7 @@ import { kit, createAdapter, pollTransactionReceipt } from '../utils/appKit';
 import { useBalances } from '../hooks/useBalances';
 
 export default function SendTab() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const { usdcBalance, eurcBalance, refetch } = useBalances();
@@ -42,8 +42,8 @@ export default function SendTab() {
   };
 
   const handleConfirm = async () => {
-    if (!walletClient || !address || !publicClient) {
-      setError('Wallet not connected');
+    if (!isConnected || !walletClient || !address || !publicClient) {
+      setError('Please connect your wallet first');
       return;
     }
 
@@ -68,6 +68,7 @@ export default function SendTab() {
       // Reset fields after success
       setAmount('');
       setRecipientAddress('');
+      setIsModalOpen(false);
       refetch();
     } catch (err: any) {
       console.error('Send error:', err);
@@ -77,9 +78,11 @@ export default function SendTab() {
     }
   };
 
-  const isDisabled = !recipientAddress || !amount || isProcessing || parseFloat(amount) > balances[selectedToken];
+  const isDisabled = !isConnected || !walletClient || !recipientAddress || !amount || isProcessing || parseFloat(amount) > balances[selectedToken];
   const buttonText = isProcessing 
     ? 'Processing...' 
+    : !isConnected || !walletClient
+    ? 'Connect Wallet'
     : !recipientAddress || !amount 
     ? 'Enter Details' 
     : parseFloat(amount) > balances[selectedToken]
