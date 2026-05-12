@@ -1,6 +1,7 @@
 import { AppKit } from '@circle-fin/app-kit';
 import { createViemAdapterFromProvider } from '@circle-fin/adapter-viem-v2';
 import type { WalletClient } from 'viem';
+import { custom } from 'viem';
 
 // Initialize App Kit
 export const kit = new AppKit();
@@ -12,32 +13,41 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
   }
   
   try {
-    // Extract the transport/provider from walletClient
-    // wagmi's walletClient has the provider in the transport
-    const provider = walletClient.transport;
+    // Get the EIP-1193 provider from window.ethereum or the wallet
+    // wagmi's walletClient.transport should have the provider
+    let provider;
     
-    // createViemAdapterFromProvider needs the EIP-1193 provider
-    // For wagmi v2, we can pass the walletClient directly as it implements the provider interface
-    const adapter = await createViemAdapterFromProvider(provider as any, { 
+    // Check if we have window.ethereum (MetaMask, etc.)
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      provider = (window as any).ethereum;
+      console.log('Using window.ethereum as provider');
+    } else if (walletClient.transport && (walletClient.transport as any).provider) {
+      // Try to get provider from transport
+      provider = (walletClient.transport as any).provider;
+      console.log('Using transport.provider');
+    } else {
+      // Fallback: use walletClient itself
+      provider = walletClient;
+      console.log('Using walletClient directly');
+    }
+    
+    const adapter = await createViemAdapterFromProvider(provider, { 
       walletAddress 
     });
+    
+    console.log('Adapter created successfully');
     return adapter;
   } catch (error: any) {
     console.error('Failed to create adapter:', error);
-    console.error('WalletClient type:', walletClient.type);
-    console.error('WalletClient transport:', walletClient.transport);
-    console.error('WalletAddress:', walletAddress);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      walletClientType: walletClient.type,
+      hasTransport: !!walletClient.transport,
+      hasWindowEthereum: typeof window !== 'undefined' && !!(window as any).ethereum
+    });
     
-    // Try alternative approach - use walletClient directly
-    try {
-      const adapter = await createViemAdapterFromProvider(walletClient as any, { 
-        walletAddress 
-      });
-      return adapter;
-    } catch (retryError: any) {
-      console.error('Retry failed:', retryError);
-      throw new Error(`Failed to create wallet adapter. Please try disconnecting and reconnecting your wallet.`);
-    }
+    throw new Error(`Failed to create wallet adapter. Please try disconnecting and reconnecting your wallet.`);
   }
 }
 
