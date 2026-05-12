@@ -47,6 +47,9 @@ export default function SwapTab() {
       
       try {
         const adapter = await createAdapter(walletClient, address);
+        
+        console.log('Fetching swap quote...');
+        
         const quote = await kit.swap({
           from: { adapter, chain: 'Arc_Testnet' },
           tokenIn: payToken,
@@ -56,13 +59,25 @@ export default function SwapTab() {
           quoteOnly: true
         });
 
+        console.log('Quote received:', quote);
+        
         setReceiveAmount(quote.amountOut || amount);
         setFee(quote.fees || '0.00');
       } catch (err: any) {
         console.error('Quote error:', err);
-        // Silently fail - don't show error for quote failures
-        setReceiveAmount(amount); // Fallback to 1:1
-        setFee('0.00');
+        
+        // Check if it's a service availability error
+        if (err.message?.includes('Maximum retry attempts') || err.message?.includes('Failed to fetch')) {
+          console.warn('Swap service unavailable for Arc Testnet, using 1:1 fallback');
+          setReceiveAmount(amount); // Fallback to 1:1
+          setFee('0.00');
+          // Don't show error for quote failures - just use fallback
+        } else {
+          // For other errors, show them
+          setError(err.message || 'Failed to get quote');
+          setReceiveAmount(amount);
+          setFee('0.00');
+        }
       } finally {
         setIsLoadingQuote(false);
       }
@@ -99,6 +114,14 @@ export default function SwapTab() {
     try {
       const adapter = await createAdapter(walletClient, address);
       
+      console.log('Attempting swap with config:', {
+        chain: 'Arc_Testnet',
+        tokenIn: payToken,
+        tokenOut: receiveToken,
+        amountIn: amount,
+        hasKitKey: !!import.meta.env.VITE_CIRCLE_KIT_KEY
+      });
+      
       const result = await kit.swap({
         from: { adapter, chain: 'Arc_Testnet' },
         tokenIn: payToken,
@@ -106,6 +129,8 @@ export default function SwapTab() {
         amountIn: amount,
         config: { kitKey: import.meta.env.VITE_CIRCLE_KIT_KEY || '' }
       });
+
+      console.log('Swap result:', result);
 
       // Poll for transaction receipt
       if (result.txHash) {
@@ -118,7 +143,18 @@ export default function SwapTab() {
       refetch();
     } catch (err: any) {
       console.error('Swap error:', err);
-      setError(err.message || 'Swap failed');
+      
+      // Provide more specific error messages
+      let errorMessage = 'Swap failed';
+      if (err.message?.includes('Maximum retry attempts')) {
+        errorMessage = 'Swap service is currently unavailable. Arc Testnet swaps may not be supported yet. Please try again later.';
+      } else if (err.message?.includes('kitKey')) {
+        errorMessage = 'Invalid API key configuration. Please check your Circle Kit Key.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
