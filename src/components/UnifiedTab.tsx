@@ -41,7 +41,7 @@ export default function UnifiedTab() {
     setError('');
 
     try {
-      const adapter = createAdapter(walletClient, address);
+      const adapter = await createAdapter(walletClient, address);
       const sourceChain = CHAIN_MAPPING[selectedDepositChain];
 
       await kit.unifiedBalance.deposit({
@@ -68,7 +68,7 @@ export default function UnifiedTab() {
     setError('');
 
     try {
-      const adapter = createAdapter(walletClient, address);
+      const adapter = await createAdapter(walletClient, address);
 
       await kit.unifiedBalance.spend({
         from: { adapter },

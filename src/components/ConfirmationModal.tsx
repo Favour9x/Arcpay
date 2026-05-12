@@ -87,7 +87,7 @@ export default function ConfirmationModal({
              <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
                <span>Estimated Network Fee</span>
              </div>
-             <p className="text-xs font-black text-slate-900">~ 0.001 ETH ($2.40)</p>
+             <p className="text-xs font-black text-slate-900">~ 0.01 USDC</p>
           </div>
 
           {/* Action Buttons */}

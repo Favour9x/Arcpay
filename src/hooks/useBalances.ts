@@ -52,7 +52,7 @@ export function useBalances() {
       // Fetch unified balance
       if (walletClient && address) {
         try {
-          const adapter = createAdapter(walletClient, address);
+          const adapter = await createAdapter(walletClient, address);
           const unifiedBal = await kit.unifiedBalance.getBalance({ adapter });
           setUnifiedBalance(unifiedBal?.balance || '0.00');
         } catch (error) {

@@ -38,7 +38,7 @@ export default function SwapTab() {
 
       setIsLoadingQuote(true);
       try {
-        const adapter = createAdapter(walletClient, address);
+        const adapter = await createAdapter(walletClient, address);
         const quote = await kit.swap({
           from: { adapter, chain: 'Arc_Testnet' },
           tokenIn: payToken,
@@ -88,7 +88,7 @@ export default function SwapTab() {
     setError('');
 
     try {
-      const adapter = createAdapter(walletClient, address);
+      const adapter = await createAdapter(walletClient, address);
       
       const result = await kit.swap({
         from: { adapter, chain: 'Arc_Testnet' },

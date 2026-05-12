@@ -51,7 +51,7 @@ export default function SendTab() {
     setError('');
 
     try {
-      const adapter = createAdapter(walletClient, address);
+      const adapter = await createAdapter(walletClient, address);
       
       const result = await kit.send({
         from: { adapter, chain: 'Arc_Testnet' },

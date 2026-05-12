@@ -71,7 +71,7 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
     setBridgeSteps([]);
 
     try {
-      const adapter = createAdapter(walletClient, address);
+      const adapter = await createAdapter(walletClient, address);
       const sourceChain = direction === 'to' ? CHAIN_MAPPING[selectedChain] : 'Arc_Testnet';
       const destChain = direction === 'to' ? 'Arc_Testnet' : CHAIN_MAPPING[selectedChain];
 

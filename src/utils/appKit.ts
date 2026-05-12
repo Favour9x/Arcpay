@@ -1,13 +1,14 @@
 import { AppKit } from '@circle-fin/app-kit';
 import { createViemAdapterFromProvider } from '@circle-fin/adapter-viem-v2';
-import { WalletClient } from 'viem';
+import type { WalletClient } from 'viem';
 
 // Initialize App Kit
 export const kit = new AppKit();
 
-// Create adapter from wallet client
-export function createAdapter(walletClient: WalletClient, walletAddress: string) {
-  return createViemAdapterFromProvider(walletClient, { walletAddress });
+// Create adapter from wallet client - returns a promise that must be awaited
+export async function createAdapter(walletClient: WalletClient, walletAddress: string) {
+  const adapter = await createViemAdapterFromProvider(walletClient, { walletAddress });
+  return adapter;
 }
 
 // Chain name mapping for Circle App Kit
