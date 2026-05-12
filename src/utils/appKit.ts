@@ -1,7 +1,6 @@
 import { AppKit } from '@circle-fin/app-kit';
 import { createViemAdapterFromProvider } from '@circle-fin/adapter-viem-v2';
 import type { WalletClient } from 'viem';
-import { custom } from 'viem';
 
 // Initialize App Kit
 export const kit = new AppKit();
@@ -13,41 +12,50 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
   }
   
   try {
-    // Get the EIP-1193 provider from window.ethereum or the wallet
-    // wagmi's walletClient.transport should have the provider
+    console.log('Creating adapter with walletClient and address:', walletAddress);
+    
+    // Try multiple methods to get the EIP1193 provider
     let provider;
     
-    // Check if we have window.ethereum (MetaMask, etc.)
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      provider = (window as any).ethereum;
-      console.log('Using window.ethereum as provider');
-    } else if (walletClient.transport && (walletClient.transport as any).provider) {
-      // Try to get provider from transport
+    // Method 1: Check if transport has a provider (custom transport)
+    if (walletClient.transport.type === 'custom' && (walletClient.transport as any).provider) {
       provider = (walletClient.transport as any).provider;
-      console.log('Using transport.provider');
-    } else {
-      // Fallback: use walletClient itself
+      console.log('✓ Using provider from custom transport');
+    }
+    // Method 2: Check window.ethereum (MetaMask, etc.)
+    else if (typeof window !== 'undefined' && window.ethereum) {
+      provider = window.ethereum;
+      console.log('✓ Using window.ethereum provider');
+    }
+    // Method 3: Check if walletClient itself can act as provider
+    else if ((walletClient as any).request) {
       provider = walletClient;
-      console.log('Using walletClient directly');
+      console.log('✓ Using walletClient as provider');
     }
     
-    const adapter = await createViemAdapterFromProvider(provider, { 
-      walletAddress 
+    if (!provider) {
+      throw new Error('No EIP1193 provider available. Please ensure your wallet is properly connected.');
+    }
+    
+    // Use createViemAdapterFromProvider which expects an EIP1193Provider
+    const adapter = await createViemAdapterFromProvider({
+      provider,
+      capabilities: { addressContext: 'user-controlled' }
     });
     
-    console.log('Adapter created successfully');
+    console.log('✅ Adapter created successfully');
     return adapter;
+    
   } catch (error: any) {
-    console.error('Failed to create adapter:', error);
+    console.error('❌ Failed to create adapter:', error);
     console.error('Error details:', {
       message: error.message,
       stack: error.stack,
-      walletClientType: walletClient.type,
-      hasTransport: !!walletClient.transport,
-      hasWindowEthereum: typeof window !== 'undefined' && !!(window as any).ethereum
+      walletClientType: walletClient?.transport?.type,
+      hasWindowEthereum: typeof window !== 'undefined' && !!window.ethereum
     });
     
-    throw new Error(`Failed to create wallet adapter. Please try disconnecting and reconnecting your wallet.`);
+    throw new Error(`Failed to create wallet adapter. ${error.message || 'Please try reconnecting your wallet.'}`);
   }
 }
 
