@@ -323,11 +323,15 @@ export default function BridgeTab({ isConnected = true }: { isConnected?: boolea
       </div>
 
       {/* Info Note */}
-      <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex gap-3">
-        <Info className="w-5 h-5 text-slate-400 shrink-0" />
-        <p className="text-[11px] font-semibold text-slate-600 leading-normal">
-          Get USDC from <a href="https://faucet.circle.com" target="_blank" className="text-blue-600 hover:underline">faucet.circle.com</a> and native gas tokens from a public faucet for your source chain.
-        </p>
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex gap-3">
+        <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="text-xs font-bold text-blue-900 mb-1">Bridge Functionality Note</p>
+          <p className="text-[11px] font-semibold text-blue-700 leading-relaxed">
+            Circle's Bridge API requires a backend server due to CORS restrictions. For production use, 
+            implement a backend proxy. Get USDC from <a href="https://faucet.circle.com" target="_blank" className="underline hover:text-blue-900">faucet.circle.com</a>.
+          </p>
+        </div>
       </div>
 
       {error && (

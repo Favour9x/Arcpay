@@ -300,8 +300,15 @@ export default function SwapTab() {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs font-bold text-red-600">
-          {error}
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-xs font-bold text-amber-900 mb-2">⚠️ Swap Feature Limitation</p>
+          <p className="text-xs text-amber-800 leading-relaxed">
+            {error}
+          </p>
+          <p className="text-xs text-amber-700 mt-2 leading-relaxed">
+            <strong>Note:</strong> Circle's Swap API requires a backend server due to CORS restrictions. 
+            For production, implement a backend proxy to handle swap requests.
+          </p>
         </div>
       )}
 
