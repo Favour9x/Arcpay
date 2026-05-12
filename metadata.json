@@ -1,0 +1,6 @@
+{
+  "name": "ArcPay",
+  "description": "A secure stablecoin payment dApp for sending, swapping, and bridging assets on Arc Testnet.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
