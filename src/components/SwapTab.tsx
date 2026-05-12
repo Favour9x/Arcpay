@@ -50,10 +50,13 @@ export default function SwapTab() {
 
         setReceiveAmount(quote.amountOut || amount);
         setFee(quote.fees || '0.00');
-      } catch (err) {
+      } catch (err: any) {
         console.error('Quote error:', err);
-        setReceiveAmount(amount); // Fallback to 1:1
-        setFee('0.00');
+        // Only show error if it's not a wallet connection issue
+        if (walletClient && address) {
+          setReceiveAmount(amount); // Fallback to 1:1
+          setFee('0.00');
+        }
       } finally {
         setIsLoadingQuote(false);
       }

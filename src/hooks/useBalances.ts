@@ -59,6 +59,8 @@ export function useBalances() {
           console.error('Error fetching unified balance:', error);
           setUnifiedBalance('0.00');
         }
+      } else {
+        setUnifiedBalance('0.00');
       }
     } catch (error) {
       console.error('Error fetching balances:', error);
