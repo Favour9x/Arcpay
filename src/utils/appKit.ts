@@ -43,9 +43,11 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x4CE212' }], // 5042002 in hex
       });
+      console.log('✓ Switched to Arc Testnet');
     } catch (switchError: any) {
       // This error code indicates that the chain has not been added to MetaMask
       if (switchError.code === 4902) {
+        console.log('Arc Testnet not found, adding it...');
         try {
           await provider.request({
             method: 'wallet_addEthereumChain',
@@ -63,10 +65,14 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
               },
             ],
           });
-        } catch (addError) {
+          console.log('✓ Arc Testnet added successfully');
+        } catch (addError: any) {
           console.error('Failed to add Arc Testnet to wallet:', addError);
-          throw new Error('Please add Arc Testnet to your wallet manually');
+          throw new Error('Failed to add Arc Testnet. Please add it manually in your wallet settings.');
         }
+      } else if (switchError.code === 4001) {
+        // User rejected the request
+        throw new Error('Please approve the network switch in your wallet');
       } else {
         console.warn('Failed to switch to Arc Testnet:', switchError);
       }
@@ -83,14 +89,10 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
     
   } catch (error: any) {
     console.error('❌ Failed to create adapter:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      walletClientType: walletClient?.transport?.type,
-      hasWindowEthereum: typeof window !== 'undefined' && !!window.ethereum
-    });
     
-    throw new Error(`Failed to create wallet adapter. ${error.message || 'Please try reconnecting your wallet.'}`);
+    // Provide user-friendly error messages
+    const errorMessage = error.message || 'Unknown error occurred';
+    throw new Error(errorMessage);
   }
 }
 
