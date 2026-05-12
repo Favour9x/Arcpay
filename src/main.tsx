@@ -44,14 +44,25 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <App />
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  </StrictMode>,
-);
+// Error boundary fallback
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+try {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            <App />
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </StrictMode>,
+  );
+} catch (error) {
+  console.error('Failed to render app:', error);
+  rootElement.innerHTML = `<div style="padding: 20px; font-family: sans-serif;"><h1>Error Loading App</h1><p>${error}</p></div>`;
+}
