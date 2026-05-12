@@ -36,6 +36,41 @@ export async function createAdapter(walletClient: WalletClient | undefined, wall
     if (!provider) {
       throw new Error('No EIP1193 provider available. Please ensure your wallet is properly connected.');
     }
+
+    // Ensure Arc Testnet is added to the wallet
+    try {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x4CE212' }], // 5042002 in hex
+      });
+    } catch (switchError: any) {
+      // This error code indicates that the chain has not been added to MetaMask
+      if (switchError.code === 4902) {
+        try {
+          await provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: '0x4CE212',
+                chainName: 'Arc Testnet',
+                nativeCurrency: {
+                  name: 'USDC',
+                  symbol: 'USDC',
+                  decimals: 18, // MetaMask requires 18 decimals for native currency
+                },
+                rpcUrls: ['https://rpc.testnet.arc.network'],
+                blockExplorerUrls: ['https://testnet.arcscan.app'],
+              },
+            ],
+          });
+        } catch (addError) {
+          console.error('Failed to add Arc Testnet to wallet:', addError);
+          throw new Error('Please add Arc Testnet to your wallet manually');
+        }
+      } else {
+        console.warn('Failed to switch to Arc Testnet:', switchError);
+      }
+    }
     
     // Use createViemAdapterFromProvider which expects an EIP1193Provider
     const adapter = await createViemAdapterFromProvider({

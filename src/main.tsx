@@ -17,7 +17,7 @@ const arcTestnet = defineChain({
   nativeCurrency: { 
     name: 'USDC', 
     symbol: 'USDC', 
-    decimals: 6 // USDC has 6 decimals
+    decimals: 18 // MetaMask requires 18 decimals for native currency
   },
   rpcUrls: {
     default: { http: ['https://rpc.testnet.arc.network'] }
@@ -33,6 +33,9 @@ const config = getDefaultConfig({
   appName: 'ArcPay',
   projectId: '0bef75de6f140b5d11bb5c9c98e4db79',
   chains: [arcTestnet],
+  transports: {
+    [arcTestnet.id]: http('https://rpc.testnet.arc.network')
+  },
   wallets: [
     {
       groupName: 'Recommended',
